@@ -3,7 +3,6 @@ name = "pepetorch"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    "pepeline>=0.3.14",
     "torch>=2.6.0",
     "torchvision>=0.21.0",
 ]
@@ -16,6 +15,11 @@ torchvision = { index = "pytorch-cu124" }
 name = "pytorch-cu124"
 url = "https://download.pytorch.org/whl/cu124"
 explicit = true
+
+[[tool.uv.index]]
+name = "yor"
+url = "https://pypi.yor.ovh/simple/"
+publish-url = "https://pypi.yor.ovh/"
 
 [project.scripts]
 pepetorch = "pepetorch:main"
