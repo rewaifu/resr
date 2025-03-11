@@ -1,5 +1,7 @@
 import time
 from functools import wraps
+import os
+from typing import Iterator, Any
 
 
 def timeit(func):
@@ -13,3 +15,22 @@ def timeit(func):
         return result
 
     return timeit_wrapper
+
+# https://github.com/neosr-project/neosr/blob/3638c169ca57d18828e8487aecee117b76645900/neosr/utils/misc.py
+
+def scandir(dir_path: str, suffix: str | None = None, recursive: bool = False) -> Iterator[Any]:
+    if (suffix is not None) and not isinstance(suffix, str | tuple):
+        msg = '"suffix" must be a string or tuple of strings'
+        raise TypeError(msg)
+
+    def _scandir(dir_path, suffix, recursive):
+        for entry in os.scandir(dir_path):
+            if not entry.name.startswith('.') and entry.is_file():
+                if suffix is None or entry.path.endswith(suffix):
+                    yield entry.path
+            elif recursive:
+                yield from _scandir(entry.path, suffix=suffix, recursive=recursive)
+            else:
+                continue
+
+    return _scandir(dir_path, suffix=suffix, recursive=recursive)

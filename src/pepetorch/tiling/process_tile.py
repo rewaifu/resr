@@ -54,10 +54,16 @@ def process_tiles(
     model: torch.nn.Module,
     scale: int,
     tiler: Tiler,
+    channels: int = 3,
     overlap: int = 32,
     dtype: torch.dtype = torch.float32,
     device: torch.device = torch.device('cuda'),
+    amp: bool = True,
 ) -> np.ndarray:
+    if len(img.shape) != channels:
+        if channels == 3:
+            img = np.stack((img,) * 3, axis=-1)
+
     h, w, c = get_h_w_c(img)
     tile_size = tiler.starting_tile_size(w, h, c)
 
@@ -80,10 +86,10 @@ def process_tiles(
                     x_start = x_seg.start - x_seg.start_padding
                     x_end = x_seg.end + x_seg.end_padding
                     tile = row[:, x_start:x_end, :]
-
                     tensor = image2tensor(tile, dtype=dtype).to(device)
-                    with torch.no_grad():
-                        tensor = model(tensor)
+                    with torch.autocast(device_type=str(device), dtype=dtype, enabled=amp):
+                        with torch.inference_mode():
+                            tensor = model(tensor)
 
                     processed_tile = tensor2image(tensor)
 
@@ -95,7 +101,9 @@ def process_tiles(
                 y_overlap = TileOverlap(start=y_seg.start_padding * scale, end=y_seg.end_padding * scale)
                 result_blender.add_tile(processed_row, y_overlap)
 
-            return result_blender.get_result()
+            result = result_blender.get_result()
+
+            return result
         except torch.cuda.OutOfMemoryError:
             tile_size = tiler.split(tile_size)
             torch.cuda.empty_cache()

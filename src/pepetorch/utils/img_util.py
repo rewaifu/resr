@@ -21,7 +21,9 @@ def image2tensor(
 
         if img.dtype == np.uint8 and dtype.is_floating_point:
             tensor = tensor.to(dtype)
-            tensor.div_(255).unsqueeze_(0)
+            tensor.div_(255)
+
+        tensor.unsqueeze_(0)
 
         if tensor.dtype != dtype:
             tensor = tensor.to(dtype)
