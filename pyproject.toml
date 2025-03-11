@@ -21,9 +21,13 @@ name = "yor"
 url = "https://pypi.yor.ovh/simple/"
 publish-url = "https://pypi.yor.ovh/"
 
-[project.scripts]
-pepetorch = "pepetorch:main"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "resselt==2.1.2",
+    "pepeline>=0.3.14",
+    "typer>=0.15.2",
+]
