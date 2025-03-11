@@ -16,7 +16,9 @@ def timeit(func):
 
     return timeit_wrapper
 
+
 # https://github.com/neosr-project/neosr/blob/3638c169ca57d18828e8487aecee117b76645900/neosr/utils/misc.py
+
 
 def scandir(dir_path: str, suffix: str | None = None, recursive: bool = False) -> Iterator[Any]:
     if (suffix is not None) and not isinstance(suffix, str | tuple):

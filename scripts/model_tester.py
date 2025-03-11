@@ -10,12 +10,11 @@ from pepetorch.tiling import process_tiles, ExactTileSize
 from pepetorch.utils.misc import scandir
 
 
-def main(input_folder: str, output_folder: str, model_folder: str, model_names: list[str]):
-
-    tiler = ExactTileSize(512)
+def main(input_folder: str, output_folder: str, model_folder: str, model_names: list[str], tile_size=512):
+    tiler = ExactTileSize(tile_size)
 
     os.makedirs(output_folder, exist_ok=True)
-    model_paths = list(scandir(model_folder, recursive=True, suffix=".pth"))
+    model_paths = list(scandir(model_folder, recursive=True, suffix='.pth'))
     image_paths = list(scandir(input_folder))
 
     for model_name in tqdm(model_names):
@@ -30,7 +29,8 @@ def main(input_folder: str, output_folder: str, model_folder: str, model_names: 
             img = read(img_path, format=ImgFormat.F32, mode=ImgColor.GRAY)
             img = process_tiles(img, tiler=tiler, model=model, scale=model.parameters_info.upscale)
             basename, _ = os.path.splitext(os.path.basename(img_path))
-            save(img, os.path.join(output_folder, f"{basename}_{base_model_name}.png"))
+            save(img, os.path.join(output_folder, f'{basename}_{base_model_name}.png'))
+
 
 if __name__ == '__main__':
     typer.run(main)
