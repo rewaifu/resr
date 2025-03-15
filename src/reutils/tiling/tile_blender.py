@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Callable
 import numpy as np
 
-from ..utils.img_util import get_h_w_c
+from ..img_util import get_h_w_c
 
 
 def sin_blend_fn(x: np.ndarray) -> np.ndarray:

@@ -5,7 +5,7 @@ import torch
 
 from .tile_blender import BlendDirection, TileOverlap, TileBlender
 from .tiler import Tiler
-from ..utils.img_util import get_h_w_c, image2tensor, tensor2image
+from ..img_util import get_h_w_c, image2tensor, tensor2image
 
 
 @dataclass
