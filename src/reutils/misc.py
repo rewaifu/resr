@@ -17,10 +17,9 @@ def timeit(func):
     return timeit_wrapper
 
 
-# https://github.com/neosr-project/neosr/blob/3638c169ca57d18828e8487aecee117b76645900/neosr/utils/misc.py
-
-
 def scandir(dir_path: str, suffix: str | None = None, recursive: bool = False) -> Iterator[Any]:
+    # https://github.com/neosr-project/neosr/blob/3638c169ca57d18828e8487aecee117b76645900/neosr/utils/misc.py
+
     if (suffix is not None) and not isinstance(suffix, str | tuple):
         msg = '"suffix" must be a string or tuple of strings'
         raise TypeError(msg)

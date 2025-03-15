@@ -31,4 +31,6 @@ dev = [
     "resselt>=2,<3",
     "pepeline>=0.3.14",
     "typer>=0.15.2",
+    "ruff>=0.11.0",
+    "pre-commit>=4.1.0",
 ]
