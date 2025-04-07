@@ -2,7 +2,7 @@ import logging
 import os
 
 import typer
-from pepeline import read, ImgFormat, ImgColor, save
+from pepeline import read, ImgFormat, save
 from resselt import load_from_file
 from tqdm import tqdm
 
@@ -28,7 +28,7 @@ def main(input_folder: str, output_folder: str, model_folder: str, model_names: 
 
             for img_path in image_paths:
                 pbar.set_description(f'Model: {model_name} | Image: {os.path.basename(img_path)}')
-                img = read(img_path, format=ImgFormat.F32, mode=ImgColor.GRAY)
+                img = read(img_path, format=ImgFormat.F32)
                 img = process_tiles(img, tiler=tiler, model=model, scale=model.parameters_info.upscale)
                 basename, _ = os.path.splitext(os.path.basename(img_path))
                 save(img, os.path.join(output_folder, f'{basename}_{base_model_name}.png'))
