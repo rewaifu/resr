@@ -3,6 +3,7 @@ name = "reutils"
 version = "0.1.1"
 requires-python = ">=3.10"
 dependencies = [
+    "opencv-python-headless>=4.11.0.86",
     "torch>=2.6.0",
     "torchvision>=0.21.0",
 ]
@@ -34,4 +35,5 @@ dev = [
     "ruff>=0.11.0",
     "pre-commit>=4.1.0",
     "tqdm>=4.67.1",
+    "chainner-ext>=0.3.10",
 ]

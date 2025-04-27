@@ -1,3 +1,4 @@
+import cv2
 import torch
 import numpy as np
 from torch import Tensor
@@ -7,6 +8,16 @@ def get_h_w_c(img: np.ndarray):
     h, w = img.shape[:2]
     c = 1 if img.ndim == 2 else img.shape[2]
     return h, w, c
+
+
+def rgb2gray(rgb):
+    return np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140])
+
+
+def median_blur_and_normalize(image, kernel_size=13):
+    blurred_image = cv2.medianBlur((image * 255).astype(np.uint8), kernel_size).astype(np.float32) / 255.0
+    min_val = np.min(blurred_image)
+    return (image.astype(np.float32) - min_val) / (np.max(blurred_image) - min_val)
 
 
 def image2tensor(
