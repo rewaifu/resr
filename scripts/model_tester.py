@@ -19,7 +19,12 @@ def main(input_folder: str, output_folder: str, model_folder: str, model_names: 
 
     with tqdm(total=len(model_names) * len(image_paths)) as pbar:
         for model_name in model_names:
-            model_path = list(filter(lambda x: model_name in x, model_paths))
+            if os.path.isabs(model_name):
+                model_path = [model_name]
+                model_name = os.path.basename(model_name)
+            else:
+                model_path = list(filter(lambda x: model_name in x, model_paths))
+
             if len(model_path) == 0:
                 logging.warn(f"Invalid model name: {model_name}. File doesn't exists in {model_folder}")
             base_model_name, _ = os.path.splitext(model_name)
