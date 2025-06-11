@@ -1,9 +1,10 @@
 [project]
-name = "reutils"
-version = "0.1.2"
+name = "resr"
+version = "1.0.0"
 requires-python = ">=3.10"
+license = "MIT"
 dependencies = [
-    "opencv-python-headless>=4.11.0.86",
+    "opencv-python>=4.11.0.86",
     "torch>=2.6.0",
     "torchvision>=0.21.0",
 ]
@@ -11,17 +12,11 @@ dependencies = [
 [tool.uv.sources]
 torch = { index = "pytorch-cu124" }
 torchvision = { index = "pytorch-cu124" }
-resselt = { index = "rewaifu" }
 
 [[tool.uv.index]]
 name = "pytorch-cu124"
 url = "https://download.pytorch.org/whl/cu124"
 explicit = true
-
-[[tool.uv.index]]
-name = "rewaifu"
-url = "https://pypi.shd.llc/rewaifu/stable"
-publish-url = "https://pypi.shd.llc/rewaifu/stable"
 
 [build-system]
 requires = ["hatchling"]
@@ -29,11 +24,11 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "resselt>=2,<3",
+    "resselt>=1",
     "pepeline>=0.3.14",
-    "typer>=0.15.2",
-    "ruff>=0.11.0",
-    "pre-commit>=4.1.0",
+    "typer>=0.16.0",
+    "ruff>=0.11.13",
     "tqdm>=4.67.1",
     "chainner-ext>=0.3.10",
+    "lefthook>=1.11.13",
 ]

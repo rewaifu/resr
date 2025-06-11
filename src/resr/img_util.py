@@ -30,14 +30,11 @@ def image2tensor(
         else:
             tensor = torch.from_numpy(img).permute(2, 0, 1)
 
-        if img.dtype == np.uint8 and dtype.is_floating_point:
-            tensor = tensor.to(dtype)
-            tensor.div_(255)
-
-        tensor.unsqueeze_(0)
-
         if tensor.dtype != dtype:
-            tensor = tensor.to(dtype)
+            tensor = tensor.to(dtype, non_blocking=True)
+
+            if img.dtype == np.uint8 and dtype.is_floating_point:
+                tensor.div_(255)
 
         return tensor
 
@@ -51,7 +48,10 @@ def tensor2image(
     dtype=np.float32,
 ) -> list[np.ndarray] | np.ndarray:
     def _to_ndarray(tensor: torch.Tensor) -> np.ndarray:
-        tensor = tensor.squeeze(0).detach().cpu()
+        if tensor.dim() == 4:
+            tensor = tensor.squeeze(0)
+
+        tensor = tensor.detach().cpu()
 
         if tensor.dtype != torch.float32:
             tensor = tensor.float()

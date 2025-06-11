@@ -12,5 +12,7 @@ wheels/
 # IDE
 .idea/
 
-# Temporary
-temp/
+# Temporary files
+tmp/
+
+/*.py

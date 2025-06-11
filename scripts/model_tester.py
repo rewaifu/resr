@@ -6,8 +6,8 @@ from pepeline import read, ImgFormat, save
 from resselt import load_from_file
 from tqdm import tqdm
 
-from reutils.tiling import process_tiles, ExactTileSize
-from reutils.misc import scandir
+from resr.tiling import process_tiles, ExactTileSize
+from resr.file_io import scandir
 
 
 def main(input_folder: str, output_folder: str, model_folder: str, model_names: list[str], tile_size: int = typer.Option(default=512)):
