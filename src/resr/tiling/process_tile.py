@@ -1,4 +1,6 @@
+import gc
 from dataclasses import dataclass
+from typing import Optional, List
 
 import numpy as np
 import torch
@@ -24,7 +26,7 @@ class Segment:
         return self.end + self.end_padding - (self.start - self.start_padding)
 
 
-def split_into_segments(length: int, tile_size: int, overlap: int) -> list[Segment]:
+def split_into_segments(length: int, tile_size: int, overlap: int) -> List[Segment]:
     if length <= tile_size:
         return [Segment(0, length, 0, 0)]
 
@@ -52,21 +54,25 @@ def process_tiles(
     channels: int = 3,
     overlap: int = 32,
     dtype: torch.dtype = torch.float32,
-    device: torch.device = torch.device('cuda'),
+    device: Optional[torch.device] = None,
     amp: bool = True,
 ) -> np.ndarray:
-    if len(img.shape) != 3 or img.shape[2] != channels:
+    if device is None:
+        device = torch.device('cuda')
+
+    if img.ndim == 2:
+        img = img[..., np.newaxis]
+    if img.shape[2] != channels:
         if channels == 3:
-            img = np.stack((img,) * 3, axis=-1)
+            img = np.repeat(img, 3, axis=2)
         elif channels == 1:
-            if len(img.shape) == 3 and img.shape[2] == 3:
-                img = np.mean(img, axis=2, keepdims=True)
-            elif len(img.shape) == 2:
-                img = img[..., np.newaxis]
+            img = np.mean(img, axis=2, keepdims=True)
 
     h, w, c = get_h_w_c(img)
     tile_size = tiler.starting_tile_size(w, h, c)
     model = model.to(device, dtype=dtype).eval()
+
+    autocast_ctx = torch.autocast(device_type=str(device), dtype=dtype, enabled=amp)
 
     while True:
         try:
@@ -78,19 +84,27 @@ def process_tiles(
 
                 for x_seg in split_into_segments(w, tile_size[0], overlap):
                     x_start, x_end = x_seg.start - x_seg.start_padding, x_seg.end + x_seg.end_padding
+                    img_tile = img[y_start:y_end, x_start:x_end, :]
 
-                    with torch.autocast(device_type=str(device), dtype=dtype, enabled=amp):
+                    with autocast_ctx:
                         with torch.inference_mode():
-                            tensor = model(image2tensor(img[y_start:y_end, x_start:x_end, :], dtype=dtype).to(device))
+                            tensor = image2tensor(img_tile, dtype=dtype).to(device).unsqueeze(0)
+                            tensor = model(tensor)
 
-                    row_blender.add_tile(tensor2image(tensor), TileOverlap(start=x_seg.start_padding * scale, end=x_seg.end_padding * scale))
-                    del tensor
+                    img_tile = tensor2image(tensor)
+                    row_blender.add_tile(img_tile, TileOverlap(start=x_seg.start_padding * scale, end=x_seg.end_padding * scale))
 
-                result_blender.add_tile(row_blender.get_result(), TileOverlap(start=y_seg.start_padding * scale, end=y_seg.end_padding * scale))
-                del row_blender
+                    del img_tile, tensor
+
+                img_row = row_blender.get_result()
+                result_blender.add_tile(img_row, TileOverlap(start=y_seg.start_padding * scale, end=y_seg.end_padding * scale))
+
+                del img_row, row_blender
+                gc.collect()
 
             return result_blender.get_result()
 
         except torch.cuda.OutOfMemoryError:
             tile_size = tiler.split(tile_size)
             torch.cuda.empty_cache()
+            gc.collect()
