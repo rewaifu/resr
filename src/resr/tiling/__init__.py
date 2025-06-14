@@ -1,4 +1,4 @@
 from .process_tile import process_tiles
-from .tiler import Tiler, MaxTileSize, ExactTileSize, NoTiling
+from .tiler import ExactTileSize, MaxTileSize, NoTiling, Tiler
 
-__all__ = ['process_tiles', 'Tiler', 'MaxTileSize', 'ExactTileSize', 'NoTiling']
+__all__ = ['ExactTileSize', 'MaxTileSize', 'NoTiling', 'Tiler', 'process_tiles']

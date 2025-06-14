@@ -1,13 +1,13 @@
 import gc
 from dataclasses import dataclass
-from typing import Optional, List
 
 import numpy as np
 import torch
 
-from .tile_blender import BlendDirection, TileOverlap, TileBlender
+from resr.img_util import get_h_w_c, image2tensor, tensor2image
+
+from .tile_blender import BlendDirection, TileBlender, TileOverlap
 from .tiler import Tiler
-from ..img_util import get_h_w_c, image2tensor, tensor2image
 
 
 @dataclass
@@ -26,7 +26,7 @@ class Segment:
         return self.end + self.end_padding - (self.start - self.start_padding)
 
 
-def split_into_segments(length: int, tile_size: int, overlap: int) -> List[Segment]:
+def split_into_segments(length: int, tile_size: int, overlap: int) -> list[Segment]:
     if length <= tile_size:
         return [Segment(0, length, 0, 0)]
 
@@ -54,7 +54,7 @@ def process_tiles(
     channels: int = 3,
     overlap: int = 32,
     dtype: torch.dtype = torch.float32,
-    device: Optional[torch.device] = None,
+    device: torch.device | None = None,
     amp: bool = True,
 ) -> np.ndarray:
     if device is None:
@@ -86,10 +86,9 @@ def process_tiles(
                     x_start, x_end = x_seg.start - x_seg.start_padding, x_seg.end + x_seg.end_padding
                     img_tile = img[y_start:y_end, x_start:x_end, :]
 
-                    with autocast_ctx:
-                        with torch.inference_mode():
-                            tensor = image2tensor(img_tile, dtype=dtype).to(device).unsqueeze(0)
-                            tensor = model(tensor)
+                    with autocast_ctx, torch.inference_mode():
+                        tensor = image2tensor(img_tile, dtype=dtype).to(device).unsqueeze(0)
+                        tensor = model(tensor)
 
                     img_tile = tensor2image(tensor)
                     row_blender.add_tile(img_tile, TileOverlap(start=x_seg.start_padding * scale, end=x_seg.end_padding * scale))
@@ -104,7 +103,7 @@ def process_tiles(
 
             return result_blender.get_result()
 
-        except torch.cuda.OutOfMemoryError:
+        except torch.cuda.OutOfMemoryError:  # noqa: PERF203
             tile_size = tiler.split(tile_size)
             torch.cuda.empty_cache()
             gc.collect()

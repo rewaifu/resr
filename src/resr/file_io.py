@@ -1,20 +1,22 @@
-import os
-from typing import Iterator, Any
+from collections.abc import Iterator
+from pathlib import Path
 
 
-def scandir(dir_path: str, suffix: str | None = None, recursive: bool = False) -> Iterator[Any]:
-    if (suffix is not None) and not isinstance(suffix, str | tuple):
-        raise TypeError('"suffix" must be a string or tuple of strings')
+def scandir(dir_path: str | Path, suffix: str | tuple[str, ...] | None = None, recursive: bool = False) -> Iterator[Path]:
+    if suffix is not None and not isinstance(suffix, (str, tuple)):
+        msg = '"suffix" must be a string or tuple of strings'
+        raise TypeError(msg)
 
-    def _scandir(dir_path, suffix, recursive):
-        for entry in os.scandir(dir_path):
-            if not entry.name.startswith('.') and entry.is_file():
-                if suffix is None or entry.path.endswith(suffix):
-                    yield entry.path
-            elif recursive:
-                yield from _scandir(entry.path, suffix=suffix, recursive=recursive)
-            else:
+    dir_path = Path(dir_path)
+
+    def _scandir(current_path: Path, suffix, recursive):
+        for entry in current_path.iterdir():
+            if entry.name.startswith('.'):
                 continue
+            if entry.is_file():
+                if suffix is None or entry.name.endswith(suffix):
+                    yield entry
+            elif recursive and entry.is_dir():
+                yield from _scandir(entry, suffix, recursive)
 
-    for path in sorted(_scandir(dir_path, suffix=suffix, recursive=recursive)):
-        yield path
+    yield from sorted(_scandir(dir_path, suffix=suffix, recursive=recursive))

@@ -1,6 +1,6 @@
 import cv2
-import torch
 import numpy as np
+import torch
 from torch import Tensor
 
 
@@ -20,15 +20,9 @@ def median_blur_and_normalize(image, kernel_size=13):
     return (image.astype(np.float32) - min_val) / (np.max(blurred_image) - min_val)
 
 
-def image2tensor(
-    value: list[np.ndarray] | np.ndarray,
-    dtype: torch.dtype = torch.float32,
-) -> list[Tensor] | Tensor:
+def image2tensor(value: list[np.ndarray] | np.ndarray, dtype: torch.dtype = torch.float32) -> list[Tensor] | Tensor:
     def _to_tensor(img: np.ndarray) -> torch.Tensor:
-        if len(img.shape) == 2:
-            tensor = torch.from_numpy(img[None, ...])
-        else:
-            tensor = torch.from_numpy(img).permute(2, 0, 1)
+        tensor = torch.from_numpy(img[None, ...]) if len(img.shape) == 2 else torch.from_numpy(img).permute(2, 0, 1)
 
         if tensor.dtype != dtype:
             tensor = tensor.to(dtype, non_blocking=True)
@@ -43,10 +37,7 @@ def image2tensor(
     return _to_tensor(value)
 
 
-def tensor2image(
-    value: list[torch.Tensor] | torch.Tensor,
-    dtype=np.float32,
-) -> list[np.ndarray] | np.ndarray:
+def tensor2image(value: list[torch.Tensor] | torch.Tensor, dtype=np.float32) -> list[np.ndarray] | np.ndarray:
     def _to_ndarray(tensor: torch.Tensor) -> np.ndarray:
         if tensor.dim() == 4:
             tensor = tensor.squeeze(0)
@@ -56,10 +47,7 @@ def tensor2image(
         if tensor.dtype != torch.float32:
             tensor = tensor.float()
 
-        if len(tensor.shape) == 2:
-            img = tensor.numpy()
-        else:
-            img = tensor.permute(1, 2, 0).numpy()
+        img = tensor.numpy() if len(tensor.shape) == 2 else tensor.permute(1, 2, 0).numpy()
 
         if tensor.dtype.is_floating_point and dtype == np.uint8:
             img = (img * 255.0).round()

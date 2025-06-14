@@ -1,11 +1,16 @@
 from __future__ import annotations
+
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable
+from typing import TYPE_CHECKING
+
 import numpy as np
 
-from ..img_util import get_h_w_c
+from resr.img_util import get_h_w_c
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def sin_blend_fn(x: np.ndarray) -> np.ndarray:
@@ -34,14 +39,10 @@ class TileOverlap:
 
 
 def _fast_mix(a: np.ndarray, b: np.ndarray, blend: np.ndarray) -> np.ndarray:
-    """
-    Returns `a * (1 - blend) + b * blend`
-    """
-    # a * (1 - blend) + b * blend
-    # a - a * blend + b * blend
+    """Returns `a * (1 - blend) + b * blend`."""
     r = b * blend
     r += a
-    r -= a * blend  # type: ignore
+    r -= a * blend
     return r
 
 
