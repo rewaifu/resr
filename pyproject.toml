@@ -16,7 +16,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "resselt>=1",
-    "pepeline>=0.3.14",
+    "pepeline==1.0.0b1",
     "typer>=0.16.0",
     "ruff>=0.11.13",
     "tqdm>=4.67.1",

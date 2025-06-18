@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def main(
     input_folder: Path,
     output_folder: Path,
-    model_folder: str,
+    model_folder: Path,
     model_names: list[Path],
     tile_size: int = typer.Option(default=512),
 ) -> None:
@@ -44,7 +44,7 @@ def main(
 
             for img_path in image_paths:
                 pbar.set_description(f"Model: {model_name_str} | Image: {img_path.name}")
-                img = read(img_path, format=ImgFormat.F32)
+                img = read(img_path, img_format=ImgFormat.F32)
                 img = process_tiles(
                     img,
                     tiler=tiler,
