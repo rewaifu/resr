@@ -1,7 +1,7 @@
 [project]
 name = "resr"
 version = "1.0.0"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "MIT"
 readme = "README.md"
 dependencies = [
@@ -20,7 +20,7 @@ dev = [
     "typer>=0.16.0",
     "tqdm>=4.67.1",
     "chainner-ext>=0.3.10",
-    "lefthook>=1.11.13",
+    "lefthook>=1",
 ]
 
 [tool.ruff]
@@ -37,7 +37,7 @@ skip-magic-trailing-comma = true
 [tool.ruff.lint]
 select = ['ALL']
 fixable = ["ALL"]
-ignore = ['ANN', 'COM812', 'CPY', 'D', "DOC", 'Q000', 'Q003', 'S101', 'PLR', 'FBT001', 'FBT002', 'PTH']
+ignore = ['ANN', 'COM812', 'CPY', 'D', "DOC", 'Q000', 'Q003', 'S101', 'PLR', 'FBT001', 'FBT002', 'PTH', 'FBT003']
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = false
