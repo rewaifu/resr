@@ -44,6 +44,4 @@ class ExactTileSize(Tiler):
 
     def split(self, _tile_size: Size) -> Size:
         msg = f'Splits not supported for exact size ({self.exact_size[0]}x{self.exact_size[1]}px). Not enough VRAM to run the current model.'
-        raise ValueError(
-            msg
-        )
+        raise ValueError(msg)
