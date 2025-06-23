@@ -1,5 +1,5 @@
 import logging
-from pathlib import Path
+import os
 
 import typer
 from pepeline import ImgFormat, read, save
@@ -13,39 +13,65 @@ from resr.tiling import ExactTileSize, process_tiles
 logger = logging.getLogger(__name__)
 
 
-def main(input_folder: Path, output_folder: Path, model_folder: Path, model_names: list[Path], tile_size: int = typer.Option(default=512), normalize: bool = typer.Option(default=False)) -> None:
+def main(
+    input_folder: str,
+    output_folder: str,
+    model_folder: str,
+    model_names: list[str],
+    tile_size: int = typer.Option(default=512),
+    normalize: bool = typer.Option(default=False),
+) -> None:
     tiler = ExactTileSize(tile_size)
 
-    output_folder.mkdir(exist_ok=True)
+    os.makedirs(output_folder, exist_ok=True)
 
     model_paths = list(scandir(model_folder, recursive=True, suffix='.pth'))
     image_paths = list(scandir(input_folder))
 
-    with tqdm(total=len(model_names) * len(image_paths)) as pbar:
-        for model_name_path in model_names:
-            if model_name_path.is_absolute():
-                model_path_list = [model_name_path]
-                model_name_str = model_name_path.name
+    total = len(model_names) * len(image_paths)
+    with tqdm(total=total) as pbar:
+        for model_name in model_names:
+            # Определяем путь к модели
+            if os.path.isabs(model_name):
+                model_path_list = [model_name]
+                model_name_str = os.path.basename(model_name)
             else:
-                model_path_list = list(filter(lambda x: model_name_path.name in x.name, model_paths))
-                model_name_str = model_name_path.name
+                model_path_list = [
+                    p for p in model_paths if model_name in os.path.basename(p)
+                ]
+                model_name_str = model_name
 
             if not model_path_list:
-                logger.warning("Invalid model name: %s. File doesn't exist in %s", model_name_str, model_folder)
+                logger.warning(
+                    "Invalid model name: %s. File doesn't exist in %s",
+                    model_name_str,
+                    model_folder,
+                )
                 continue
 
-            base_model_name = Path(model_name_str).stem
+            base_model_name = os.path.splitext(model_name_str)[0]
             model = load_from_file(model_path_list[0])
 
             for img_path in image_paths:
-                pbar.set_description(f'Model: {model_name_str} | Image: {img_path.name}')
-                img = read(str(img_path), img_format=ImgFormat.F32)
+                img_name = os.path.basename(img_path)
+                pbar.set_description(
+                    f'Model: {model_name_str} | Image: {img_name}'
+                )
+                img = read(img_path, img_format=ImgFormat.F32)
                 if normalize:
                     img = median_blur_and_normalize(img)
-                img = process_tiles(img, tiler=tiler, model=model, scale=model.parameters_info.upscale)
-                basename = img_path.stem
-                output_path = output_folder / f'{basename}_{base_model_name}.png'
-                save(img, str(output_path))
+                img = process_tiles(
+                    img,
+                    tiler=tiler,
+                    model=model,
+                    scale=model.parameters_info.upscale,
+                )
+                basename = os.path.splitext(img_name)[0]
+                output_path = os.path.join(
+                    output_folder,
+                    f'{basename}_{base_model_name}.png',
+                )
+                save(img, output_path)
                 pbar.update(1)
 
 
