@@ -118,7 +118,6 @@ def process_tiles(
     while True:
         try:
             for scale in scale_list:
-                print(scale)
                 h, w, c = get_h_w_c(img)
                 tile_size = tiler.starting_tile_size(w, h, c)
                 result_blender = TileBlender(h * scale, w * scale, c, BlendDirection.Y)
