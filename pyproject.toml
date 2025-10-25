@@ -1,12 +1,13 @@
 [project]
 name = "resr"
-version = "1.0.0"
+version = "1.1.0"
 requires-python = ">=3.10"
 license = "MIT"
 readme = "README.md"
 dependencies = [
     "opencv-python-headless>=4.10",
     "torch>=2.6.0",
+    "pepeline>=1.1.0" 
 ]
 
 [build-system]
